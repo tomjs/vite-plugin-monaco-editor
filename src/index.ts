@@ -1,5 +1,5 @@
 import type { Plugin } from 'vite';
-import type { PluginOptions } from './types';
+import type { NpmLocal, PluginOptions } from './types';
 import path from 'node:path';
 import fs from 'fs-extra';
 import { parse as htmlParser } from 'node-html-parser';
@@ -7,6 +7,11 @@ import { PLUGIN_NAME } from './constants';
 import { urlConcat } from './utils';
 
 export * from './types';
+
+const CdnUrlMap = {
+  unpkg: 'https://unpkg.com/monaco-editor@{version}',
+  jsdelivr: 'https://cdn.jsdelivr.net/npm/monaco-editor@{version}',
+};
 
 function getPkgVersion() {
   const pwd = process.cwd();
@@ -43,25 +48,38 @@ function getInjectHtml(urlPrefix: string) {
 <script src="${urlPrefix}/editor/editor.main.js"></script>`;
 }
 
-function preHandleOptions(options?: PluginOptions) {
-  const opts = Object.assign({}, options);
+function preHandleOptions(
+  options?: PluginOptions,
+): Omit<PluginOptions, 'local'> & { local?: NpmLocal } {
+  const { local, ...opts } = Object.assign(
+    {
+      type: 'unpkg',
+    } as PluginOptions,
+    options,
+  );
   const serveOpts = Object.assign({}, opts.serve);
   serveOpts.base = serveOpts.base || './';
   opts.serve = serveOpts;
 
-  opts.build = Object.assign({}, opts.build);
+  let localOpts: NpmLocal | undefined;
+  if (local === true) {
+    localOpts = { copy: true };
+  } else if (typeof local === 'object') {
+    localOpts = local;
+  }
 
-  return opts;
+  return Object.assign(opts, { local: localOpts });
 }
 
 /**
  * use vite plugin for [monaco-editor](https://github.com/microsoft/monaco-editor)
  */
 export function useMonacoEditorPlugin(options?: PluginOptions): Plugin[] {
-  const opts: PluginOptions = preHandleOptions(options);
+  const opts = preHandleOptions(options);
 
   const serveOpts = opts.serve;
-  const buildOpts = opts.build || {};
+  const localOpts = opts.local;
+
   let cdUrl: string;
 
   return [
@@ -81,42 +99,43 @@ export function useMonacoEditorPlugin(options?: PluginOptions): Plugin[] {
       configResolved(config) {
         console.log(config.base);
 
-        buildOpts.base ||= config.base;
-        buildOpts.outDir ||= config.build.outDir;
-        buildOpts.copy ??= true;
+        if (localOpts) {
+          localOpts.base ||= config.base;
+          localOpts.outDir ||= config.build.outDir;
+          localOpts.copy ??= true;
 
-        if (buildOpts?.cdn) {
-          cdUrl =
-            buildOpts?.cdn === 'unpkg'
-              ? 'https://cdn.jsdelivr.net/npm/monaco-editor@{version}'
-              : 'https://unpkg.com/monaco-editor@{version}';
-          cdUrl = cdUrl.replace(/@{version}/g, getPkgVersion());
+          localOpts.path ||= 'npm/monaco-editor@{version}';
+          localOpts.path = localOpts.path.replace(/{version}/g, getPkgVersion());
+
+          opts.local = localOpts;
         } else {
-          const buildPath = buildOpts?.path || 'npm/monaco-editor@{version}';
-          buildOpts.path = buildPath.replace(/@{version}/g, getPkgVersion());
+          cdUrl = CdnUrlMap[opts.type || 'unpkg'] || opts.url || '';
+          if (!cdUrl) {
+            throw new Error('When the type parameter is custom, the url parameter is required.');
+          }
+
+          cdUrl = cdUrl.replace(/{version}/g, getPkgVersion());
         }
       },
       transformIndexHtml(html) {
         const { root, title } = getHtmlRoot(html);
-
-        const urlPrefix =
-          cdUrl || urlConcat(buildOpts?.base || '/', buildOpts.path || '', '/min/vs');
-        title?.insertAdjacentHTML('afterend', getInjectHtml(urlPrefix));
+        const urlPrefix = cdUrl || urlConcat(localOpts?.base || '/', localOpts?.path || '');
+        title?.insertAdjacentHTML('afterend', getInjectHtml(urlConcat(urlPrefix, '/min/vs')));
         return root.toString();
       },
       closeBundle() {
-        if (!buildOpts?.copy && !cdUrl) {
+        if (!localOpts?.copy) {
           return;
         }
         // Output directory
-        const outDir = buildOpts.outDir || 'dist';
+        const outDir = localOpts.outDir || 'dist';
         const outPath = path.join(process.cwd(), outDir);
         if (!fs.existsSync(outPath)) {
           fs.mkdirpSync(outPath);
         }
 
         const srcFolder = path.join(process.cwd(), 'node_modules/monaco-editor/min');
-        const destFolder = path.join(outPath, buildOpts.path!, 'min');
+        const destFolder = path.join(outPath, localOpts.path!, 'min');
         fs.copySync(srcFolder, destFolder);
       },
     },
