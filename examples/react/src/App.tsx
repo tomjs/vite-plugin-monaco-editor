@@ -1,11 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import viteLogo from '/vite.svg';
 import reactLogo from './assets/react.svg';
 
 import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0);
+  const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const monacoEl = useRef(null);
+
+  useEffect(() => {
+    if (monacoEl) {
+      setEditor(editor => {
+        if (editor) return editor;
+
+        return monaco.editor.create(monacoEl.current!, {
+          value: ['function x() {', '\tconsole.log("Hello World!");', '}'].join('\n'),
+          language: 'typescript',
+        });
+      });
+    }
+
+    return () => editor?.dispose();
+  }, [editor]);
 
   return (
     <>
@@ -17,14 +33,15 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount(count => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">Click on the Vite and React logos to learn more</p>
+      <div
+        ref={monacoEl}
+        style={{
+          display: 'block',
+          width: 800,
+          height: 600,
+          border: '1px solid grey',
+        }}
+      ></div>
     </>
   );
 }
