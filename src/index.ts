@@ -58,7 +58,6 @@ function preHandleOptions(
     options,
   );
   const serveOpts = Object.assign({}, opts.serve);
-  serveOpts.base = serveOpts.base || './';
   opts.serve = serveOpts;
 
   let localOpts: NpmLocal | undefined;
@@ -77,8 +76,8 @@ function preHandleOptions(
 export function useMonacoEditorPlugin(options?: PluginOptions): Plugin[] {
   const opts = preHandleOptions(options);
 
-  const serveOpts = opts.serve;
-  const localOpts = opts.local;
+  const serveOpts = opts.serve!;
+  const localOpts = opts.local!;
 
   let cdUrl: string;
 
@@ -86,9 +85,12 @@ export function useMonacoEditorPlugin(options?: PluginOptions): Plugin[] {
     {
       name: PLUGIN_NAME,
       apply: 'serve',
+      configResolved(config) {
+        serveOpts.base = serveOpts?.base || config.base || '/';
+      },
       transformIndexHtml(html) {
         const { root, title } = getHtmlRoot(html);
-        const urlPrefix = urlConcat(serveOpts?.base || './', `node_modules/monaco-editor/dev/vs`);
+        const urlPrefix = urlConcat(serveOpts.base!, `node_modules/monaco-editor/dev/vs`);
         title?.insertAdjacentHTML('afterend', getInjectHtml(urlPrefix));
         return root.toString();
       },

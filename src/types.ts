@@ -23,8 +23,8 @@ export interface NpmLocal {
 
 export interface ServerConfig {
   /**
-   * Relative path to node_modules. Default is "./".
-   * @default './'
+   * Relative path to node_modules. Default is "/".
+   * @default '/'
    */
   base?: string;
 }
