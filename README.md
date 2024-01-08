@@ -69,10 +69,17 @@ export default defineConfig({
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| type | `'unpkg' \| 'jsdelivr' \| 'custom'` | `'unpkg'` | CDN source type |
+| type | `'npmmirror' \| 'unpkg' \| 'jsdelivr' \| 'custom'` | `'unpkg'` | `CDN` source type, parameters `version` are taken from the modules configuration. When the OS language is `zh_CN` , the default value is `npmmirror`, otherwise it is `jsdelivr`. |
 | url | `string` | '' | Custom URL (used with `type` ) |
 | local | `boolean` \| [NpmLocal](#NpmLocal) | `false` | Local mode or more configurations for local mode |
 | serve | [ServerConfig](#ServerConfig) | `{ base: './'}` | Configuration when vite command is serve |
+
+CDN type:
+
+- npmmirror: base will be set to https://registry.npmmirror.com/monaco-editor/{version}/files
+- jsdelivr: base will be set to https://cdn.jsdelivr.net/npm/monaco-editor@{version}
+- unpkg: base will be set to https://unpkg.com/monaco-editor@{version}
+- custom: custom url can be defined
 
 ### NpmLocal
 

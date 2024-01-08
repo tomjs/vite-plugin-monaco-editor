@@ -8,7 +8,8 @@ import { urlConcat } from './utils';
 
 export * from './types';
 
-const CdnUrlMap = {
+const urlTypeMap = {
+  npmmirror: 'https://registry.npmmirror.com/monaco-editor/{version}/files',
   unpkg: 'https://unpkg.com/monaco-editor@{version}',
   jsdelivr: 'https://cdn.jsdelivr.net/npm/monaco-editor@{version}',
 };
@@ -51,12 +52,7 @@ function getInjectHtml(urlPrefix: string) {
 function preHandleOptions(
   options?: PluginOptions,
 ): Omit<PluginOptions, 'local'> & { local?: NpmLocal } {
-  const { local, ...opts } = Object.assign(
-    {
-      type: 'unpkg',
-    } as PluginOptions,
-    options,
-  );
+  const { local, ...opts } = Object.assign({} as PluginOptions, options);
   const serveOpts = Object.assign({}, opts.serve);
   opts.serve = serveOpts;
 
@@ -111,12 +107,22 @@ export function useMonacoEditorPlugin(options?: PluginOptions): Plugin[] {
 
           opts.local = localOpts;
         } else {
-          cdUrl = CdnUrlMap[opts.type || 'unpkg'] || opts.url || '';
-          if (!cdUrl) {
+          // URL type
+          let { type, url } = opts;
+          if (!type || !['npmmirror', 'jsdelivr', 'unpkg', 'custom'].includes(type)) {
+            type =
+              new Intl.NumberFormat().resolvedOptions().locale === 'zh-CN'
+                ? 'npmmirror'
+                : 'jsdelivr';
+          }
+
+          if (['npmmirror', 'jsdelivr', 'unpkg'].includes(type)) {
+            url = urlTypeMap[type];
+          } else if (!url) {
             throw new Error('When the type parameter is custom, the url parameter is required.');
           }
 
-          cdUrl = cdUrl.replace(/{version}/g, getPkgVersion());
+          cdUrl = url!.replace(/{version}/g, getPkgVersion());
         }
       },
       transformIndexHtml(html) {

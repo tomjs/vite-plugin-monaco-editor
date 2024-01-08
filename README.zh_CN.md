@@ -67,12 +67,19 @@ export default defineConfig({
 
 ## 参数
 
-| 参数  | 类型                                | 默认            | 描述                             |
-| ----- | ----------------------------------- | --------------- | -------------------------------- |
-| type  | `'unpkg' \| 'jsdelivr' \| 'custom'` | `'unpkg'`       | CDN源类型                        |
-| url   | `string`                            | ''              | 自定义 URL（与 `type` 一起使用） |
-| local | `boolean` \| [NpmLocal](#NpmLocal)  | `false`         | 本地模式或本地模式的更多配置     |
-| serve | [ServerConfig](#ServerConfig)       | `{ base: './'}` | vite命令为serve时的配置          |
+| 参数 | 类型 | 默认 | 描述 |
+| --- | --- | --- | --- |
+| type | `'npmmirror' \| 'unpkg' \| 'jsdelivr' \| 'custom'` | `'unpkg'` | `CDN` 源类型，参数 `name`/`version`/`file` 取自模块配置。 当操作系统语言为 `zh_CN` 时，默认值为 `npmmirror` ，否则为 `jsdelivr`。 |
+| url | `string` | '' | 自定义 URL（与 `type` 一起使用） |
+| local | `boolean` \| [NpmLocal](#NpmLocal) | `false` | 本地模式或本地模式的更多配置 |
+| serve | [ServerConfig](#ServerConfig) | `{ base: './'}` | vite命令为serve时的配置 |
+
+CDN type:
+
+- npmmirror: url 默认为 https://registry.npmmirror.com/monaco-editor/{version}/files
+- jsdelivr: url 默认为 https://cdn.jsdelivr.net/npm/monaco-editor@{version}
+- unpkg: url 默认为 https://unpkg.com/monaco-editor@{version}
+- custom: 可以自定义 url
 
 ### NpmLocal
 

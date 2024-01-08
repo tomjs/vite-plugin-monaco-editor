@@ -34,17 +34,25 @@ export interface ServerConfig {
  */
 export interface PluginOptions {
   /**
-   * cdn source type, parameters name/version/file are taken from the modules configuration. Default is "unpkg".
+   * `CDN` source type, parameters `version` are taken from the modules configuration.
+   *
+   * When the OS language is `zh_CN` , the default value is `npmmirror`, otherwise it is `jsdelivr`.
+   *
+   * * npmmirror: base will be set to https://registry.npmmirror.com/monaco-editor/{version}/files
    * * jsdelivr: base will be set to https://cdn.jsdelivr.net/npm/monaco-editor@{version}
    * * unpkg: base will be set to https://unpkg.com/monaco-editor@{version}
    * * custom: custom url can be defined
    *
-   * @default unpkg
+   * @default "npmmirror"
    */
-  type?: 'unpkg' | 'jsdelivr' | 'custom';
+  type?: 'npmmirror' | 'unpkg' | 'jsdelivr' | 'custom';
 
   /**
    * Used in conjunction with the type parameter, sets different urls
+   *
+   * When the OS language is `zh_CN` , the default value is `npmmirror`, otherwise it is `jsdelivr`.
+   *
+   * * npmmirror: https://registry.npmmirror.com/monaco-editor/{version}/files
    * * jsdelivr: https://cdn.jsdelivr.net/npm/monaco-editor@{version}
    * * unpkg: https://unpkg.com/monaco-editor@{version}
    * * custom: custom url
