@@ -1,6 +1,6 @@
 # @tomjs/vite-plugin-monaco-editor
 
-[![npm](https://img.shields.io/npm/v/@tomjs/vite-plugin-monaco-editor)](https://www.npmjs.com/package/@tomjs/vite-plugin-monaco-editor) ![node-current (scoped)](https://img.shields.io/node/v/@tomjs/vite-plugin-monaco-editor) ![NPM](https://img.shields.io/npm/l/@tomjs/vite-plugin-monaco-editor) [![Docs](https://www.paka.dev/badges/v0/cute.svg)](https://www.paka.dev/npm/@tomjs/vite-plugin-monaco-editor)
+[![npm](https://img.shields.io/npm/v/@tomjs/vite-plugin-monaco-editor)](https://www.npmjs.com/package/@tomjs/vite-plugin-monaco-editor) ![node-current (scoped)](https://img.shields.io/node/v/@tomjs/vite-plugin-monaco-editor) ![NPM](https://img.shields.io/npm/l/@tomjs/vite-plugin-monaco-editor) [![Docs](https://img.shields.io/badge/API-unpkg-orange)](https://www.unpkg.com/browse/@tomjs/vite-plugin-monaco-editor/dist/index.d.ts)
 
 [English](./README.md) | **中文**
 
@@ -62,7 +62,6 @@ export default defineConfig({
 
 ## 文档
 
-- [paka.dev](https://paka.dev) 提供的 [API文档](https://paka.dev/npm/@tomjs/vite-plugin-monaco-editor).
 - [unpkg.com](https://www.unpkg.com/) 提供的 [index.d.ts](https://www.unpkg.com/browse/@tomjs/vite-plugin-monaco-editor/dist/index.d.ts).
 
 ## 参数
